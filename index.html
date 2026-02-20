@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuestionario Teorema de Pitágoras – Grado 10°</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #e8a838;
+    --accent2: #4fc3f7;
+    --text: #e8e6df;
+    --text-muted: #8b9ab0;
+    --success: #4caf8a;
+    --error: #e05c5c;
+    --border: #2a3650;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #0d1b35 0%, #1a2a50 50%, #0d1b35 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(232,168,56,0.03) 30px, rgba(232,168,56,0.03) 60px);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+  .header .subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    position: relative;
+    z-index: 1;
+  }
+  .teacher {
+    font-size: 0.85rem;
+    color: var(--accent2);
+    margin-top: 0.3rem;
+    position: relative;
+    z-index: 1;
+    font-style: italic;
+  }
+
+  /* REGISTRO */
+  #registro-screen {
+    max-width: 520px;
+    margin: 3rem auto;
+    padding: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  #registro-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .form-group { margin-bottom: 1.2rem; }
+  label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  input[type=text], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  input[type=text]:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+  .btn-start {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--accent);
+    color: #0a0e1a;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+  }
+  .btn-start:hover { background: #f5bc4a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,168,56,0.3); }
+
+  /* QUIZ */
+  #quiz-screen { display: none; max-width: 780px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .question-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .question-category {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--accent2);
+  }
+
+  /* TIMER */
+  .timer-ring { position: relative; width: 70px; height: 70px; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-circle-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+  .timer-circle { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .question-number {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+  .question-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .question-figure {
+    text-align: center;
+    margin-bottom: 1.2rem;
+  }
+  .question-figure svg {
+    max-width: 280px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  }
+
+  .options { display: flex; flex-direction: column; gap: 0.75rem; }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 0.9rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.97rem;
+    line-height: 1.5;
+    transition: all 0.2s;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #1e2d4a;
+    transform: translateX(4px);
+  }
+  .option-btn:disabled { cursor: not-allowed; }
+  .option-btn.correct { border-color: var(--success); background: rgba(76,175,138,0.12); color: #7ae0b5; }
+  .option-btn.wrong { border-color: var(--error); background: rgba(224,92,92,0.12); color: #f08080; }
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent);
+    transition: background 0.2s;
+  }
+  .option-btn.correct .option-letter { background: var(--success); color: #0a0e1a; }
+  .option-btn.wrong .option-letter { background: var(--error); color: #fff; }
+
+  /* FEEDBACK */
+  .feedback-box {
+    display: none;
+    margin-top: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    border-left: 4px solid;
+    animation: fadeIn 0.3s ease;
+  }
+  .feedback-box.correct-fb { background: rgba(76,175,138,0.1); border-color: var(--success); color: #a8f0d0; }
+  .feedback-box.wrong-fb { background: rgba(224,92,92,0.1); border-color: var(--error); color: #f5aaaa; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .btn-next {
+    margin-top: 1.2rem;
+    padding: 0.75rem 2rem;
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+  }
+  .btn-next:hover { background: var(--accent); color: #0a0e1a; }
+
+  /* RESULTS */
+  #result-screen {
+    display: none;
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  #result-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .result-name { font-size: 1.1rem; color: var(--accent2); margin-bottom: 1.5rem; }
+  .nota-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin: 1rem 0;
+  }
+  .nota-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .score-detail { margin: 1.5rem 0; font-size: 0.95rem; color: var(--text-muted); }
+  .score-detail span { color: var(--text); font-weight: 600; }
+  .result-summary { 
+    text-align: left; 
+    margin-top: 1.5rem; 
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+  .result-summary h3 { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--accent); margin-bottom: 1rem; }
+  .result-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.7rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .ri-num { width: 22px; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .ri-ok { background: var(--success); color: #0a0e1a; }
+  .ri-no { background: var(--error); color: #fff; }
+
+  .export-section {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+  .export-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+    text-align: center;
+  }
+  .export-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .btn-download-xl {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #1a6e3a, #1e8847);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(30,136,71,0.35);
+    letter-spacing: 0.02em;
+  }
+  .btn-download-xl:hover {
+    background: linear-gradient(135deg, #1e8847, #22a055);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(30,136,71,0.45);
+  }
+  .btn-download-xl:active { transform: translateY(0); }
+  .btn-download-xl svg { flex-shrink: 0; }
+  .download-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.8rem;
+    font-style: italic;
+  }
+  .download-success {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background: rgba(76,175,138,0.12);
+    border: 1px solid var(--success);
+    border-radius: 8px;
+    color: #7ae0b5;
+    font-size: 0.85rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* math inline */
+  .math { font-style: italic; }
+  sup { font-size: 0.7em; }
+
+  @media (max-width: 600px) {
+    #registro-screen, #result-screen { margin: 1rem; padding: 1.5rem; }
+    #quiz-screen { padding: 1rem 0.75rem 3rem; }
+    .question-card { padding: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Cuestionario — Teorema de Pitágoras</h1>
+  <div class="subtitle">Trigonometría · Grado 10° · I.E. Colombia</div>
+  <div class="teacher">Docente: Luis Jorge Millán Bustamante</div>
+</div>
+
+<!-- PANTALLA REGISTRO -->
+<div id="registro-screen">
+  <h2>Datos del Estudiante</h2>
+  <div class="form-group">
+    <label for="inp-nombre">Nombre Completo</label>
+    <input type="text" id="inp-nombre" placeholder="Escribe tu nombre completo">
+  </div>
+  <div class="form-group">
+    <label for="inp-grado">Grado</label>
+    <select id="inp-grado">
+      <option value="">— Selecciona —</option>
+      <option value="10-A">10° A</option>
+      <option value="10-B">10° B</option>
+      <option value="10-C">10° C</option>
+      <option value="10-D">10° D</option>
+      <option value="10-E">10° E</option>
+    </select>
+  </div>
+  <button class="btn-start" onclick="iniciarQuiz()">Iniciar cuestionario →</button>
+</div>
+
+<!-- PANTALLA QUIZ -->
+<div id="quiz-screen">
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar"></div></div>
+  <div class="question-meta">
+    <span class="question-category" id="q-category">—</span>
+    <div class="timer-ring">
+      <svg width="70" height="70" viewBox="0 0 70 70">
+        <circle class="timer-circle-bg" cx="35" cy="35" r="30"/>
+        <circle class="timer-circle" id="timer-circle" cx="35" cy="35" r="30"
+          stroke-dasharray="188.5" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timer-text">2:00</div>
+    </div>
+  </div>
+  <div class="question-card">
+    <div class="question-number" id="q-number">Pregunta 1 de 10</div>
+    <div class="question-text" id="q-text"></div>
+    <div class="question-figure" id="q-figure"></div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback-box" id="feedback-box"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+  </div>
+</div>
+
+<!-- PANTALLA RESULTADOS -->
+<div id="result-screen">
+  <h2>Resultados</h2>
+  <div class="result-name" id="res-name"></div>
+  <div class="nota-label">Nota</div>
+  <div class="nota-display" id="res-nota"></div>
+  <div class="score-detail">
+    Respondiste correctamente <span id="res-correctas"></span> de <span id="res-total">10</span> preguntas
+  </div>
+  <div class="result-summary">
+    <h3>Resumen por pregunta</h3>
+    <div id="res-items"></div>
+  </div>
+  <div class="export-section">
+    <h3>📥 Descargar mis resultados</h3>
+    <p class="export-hint">Descarga tu reporte en Excel y envíaselo al docente<br>por WhatsApp, correo o la plataforma del colegio.</p>
+    <button class="btn-download-xl" onclick="descargarExcel()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Descargar reporte Excel (.xlsx)
+    </button>
+    <div class="download-note">El archivo se guardará como: <span id="filename-preview" style="color:var(--accent2)">resultado_estudiante.xlsx</span></div>
+    <div class="download-success" id="download-success">✔ ¡Archivo descargado! Recuerda enviarlo al docente Luis Jorge Millán Bustamante.</div>
+  </div>
+</div>
+
+<script>
+// ======================== PREGUNTAS ========================
+const preguntas = [
+  // -------- BLOQUE 1: COMPROBACIÓN TRIÁNGULO RECTÁNGULO (2 preguntas) --------
+  {
+    tipo: "Comprobación de triángulo rectángulo",
+    texto: "Un triángulo tiene lados de longitud <em>a</em> = 7, <em>b</em> = <span class='math'>√<span style='text-decoration:overline'> 51 </span></span> y <em>c</em> = 10. ¿Cumple el Teorema de Pitágoras y por tanto es rectángulo?",
+    figura: "",
+    opciones: [
+      { txt: "No es rectángulo porque 49 + 51 ≠ 100", correcta: false },
+      { txt: "Sí es rectángulo porque 7² + (√51)² = 49 + 51 = 100 = 10²", correcta: true },
+      { txt: "Sí es rectángulo porque 7 + √51 = 10", correcta: false },
+      { txt: "No es rectángulo porque √51 no es número entero", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. Aplicamos el Teorema de Pitágoras: a² + b² = c². Sustituimos: 7² + (√51)² = 49 + 51 = 100 = 10². Como se cumple la igualdad, el triángulo SÍ es rectángulo. La hipotenusa es el lado de mayor longitud, en este caso c = 10.",
+    feedback_err: "✘ Incorrecto. Recuerda que el Teorema de Pitágoras establece que a² + b² = c², donde c es el lado más largo. Aquí: 7² + (√51)² = 49 + 51 = 100 = 10². La igualdad se cumple, por lo tanto el triángulo sí es rectángulo."
+  },
+  {
+    tipo: "Comprobación de triángulo rectángulo",
+    texto: "Los lados de un triángulo miden <em>a</em> = <span class='math'>√<span style='text-decoration:overline'> 5 </span></span>, <em>b</em> = <span class='math'>√<span style='text-decoration:overline'> 20 </span></span> y <em>c</em> = 5. Determina si el triángulo es rectángulo usando el Teorema de Pitágoras.",
+    figura: "",
+    opciones: [
+      { txt: "Sí es rectángulo: (√5)² + (√20)² = 5 + 20 = 25 = 5²", correcta: true },
+      { txt: "No es rectángulo: √5 · √20 ≠ 25", correcta: false },
+      { txt: "No es rectángulo porque ningún lado es entero", correcta: false },
+      { txt: "Sí es rectángulo: √5 + √20 = 5", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. (√5)² + (√20)² = 5 + 20 = 25 = 5². Se cumple a² + b² = c², por lo tanto el triángulo es rectángulo. Observa que √5 · √20 = √100 = 10, que es otro resultado útil pero no el criterio de Pitágoras.",
+    feedback_err: "✘ Incorrecto. Debes elevar al cuadrado cada lado: (√5)² = 5, (√20)² = 20, 5² = 25. Como 5 + 20 = 25, se cumple a² + b² = c², y el triángulo sí es rectángulo."
+  },
+
+  // -------- BLOQUE 2: HALLAR EL LADO DESCONOCIDO (3 preguntas) --------
+  {
+    tipo: "Cálculo del lado desconocido",
+    texto: "En un triángulo rectángulo, los catetos miden <em>a</em> = <span class='math'>√<span style='text-decoration:overline'> 7 </span></span> y <em>b</em> = 3. ¿Cuánto mide la hipotenusa <em>c</em>?",
+    figura: svgTriangulo(120, 90, "√7", "3", "c = ?", true),
+    opciones: [
+      { txt: "c = 4", correcta: true },
+      { txt: "c = √10", correcta: false },
+      { txt: "c = √(7+9) = √16 = 4, entonces c = 4", correcta: false },
+      { txt: "c = 3 + √7", correcta: false },
+    ],
+    // Nota: la opción A y C llevan al mismo valor numérico, se simplifica
+    feedback_ok: "✔ Correcto. c² = a² + b² = (√7)² + 3² = 7 + 9 = 16 → c = √16 = 4. La hipotenusa mide exactamente 4 unidades.",
+    feedback_err: "✘ Incorrecto. Aplica el Teorema de Pitágoras: c² = a² + b² = (√7)² + 3² = 7 + 9 = 16. Extrayendo raíz: c = √16 = 4."
+  },
+  {
+    tipo: "Cálculo del lado desconocido",
+    texto: "En un triángulo rectángulo, la hipotenusa mide <em>c</em> = <span class='math'>√<span style='text-decoration:overline'> 53 </span></span> y uno de sus catetos es <em>a</em> = 2. Halla el cateto <em>b</em>.",
+    figura: svgTriangulo(140, 90, "2", "b = ?", "√53", false),
+    opciones: [
+      { txt: "b = √57", correcta: false },
+      { txt: "b = 7", correcta: true },
+      { txt: "b = √49 = 7", correcta: false },
+      { txt: "b = √51", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. b² = c² − a² = (√53)² − 2² = 53 − 4 = 49 → b = √49 = 7.",
+    feedback_err: "✘ Incorrecto. Para hallar un cateto cuando conoces la hipotenusa: b² = c² − a² = 53 − 4 = 49 → b = 7."
+  },
+  {
+    tipo: "Cálculo del lado desconocido",
+    texto: "En un triángulo rectángulo, los catetos son <em>a</em> = <span class='math'>√<span style='text-decoration:overline'> 3 </span></span> y <em>b</em> = <span class='math'>√<span style='text-decoration:overline'> 13 </span></span>. ¿Cuánto mide la hipotenusa?",
+    figura: svgTriangulo(130, 90, "√3", "√13", "c = ?", true),
+    opciones: [
+      { txt: "c = √(√3 + √13)", correcta: false },
+      { txt: "c = 4", correcta: true },
+      { txt: "c = √16 = 4", correcta: false },
+      { txt: "c = √(13·3) = √39", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. c² = (√3)² + (√13)² = 3 + 13 = 16 → c = 4.",
+    feedback_err: "✘ Incorrecto. Recuerda: c² = a² + b² = 3 + 13 = 16 → c = √16 = 4."
+  },
+
+  // -------- BLOQUE 3: APLICACIONES (5 preguntas) --------
+  {
+    tipo: "Aplicación",
+    texto: "Una escalera de <em>c</em> = 13 m se apoya contra una pared. La base de la escalera está a <em>a</em> = 5 m de la pared. ¿A qué altura <em>h</em> llega la escalera en la pared? (Usa terna pitagórica)",
+    figura: svgEscalera(),
+    opciones: [
+      { txt: "h = 8 m", correcta: false },
+      { txt: "h = 12 m", correcta: true },
+      { txt: "h = √194 m", correcta: false },
+      { txt: "h = √(169−25) m ≈ 11.8 m", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. Por Pitágoras: h² = 13² − 5² = 169 − 25 = 144 → h = 12 m. (5, 12, 13) es una terna pitagórica clásica.",
+    feedback_err: "✘ Incorrecto. h² = c² − a² = 169 − 25 = 144 → h = √144 = 12 m. La terna (5, 12, 13) satisface 5² + 12² = 25 + 144 = 169 = 13²."
+  },
+  {
+    tipo: "Aplicación",
+    texto: "Un campo rectangular mide 20 m de largo y 21 m de ancho. Un corredor cruza el campo en diagonal. ¿Cuánto mide la diagonal <em>d</em>?",
+    figura: svgRectangulo(),
+    opciones: [
+      { txt: "d = 41 m", correcta: false },
+      { txt: "d = 29 m", correcta: true },
+      { txt: "d = √841 m", correcta: false },
+      { txt: "d = √(20+21) m", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. d² = 20² + 21² = 400 + 441 = 841 → d = √841 = 29 m. (20, 21, 29) es una terna pitagórica.",
+    feedback_err: "✘ Incorrecto. La diagonal de un rectángulo es la hipotenusa del triángulo rectángulo formado. d² = 20² + 21² = 841 → d = 29 m."
+  },
+  {
+    tipo: "Aplicación",
+    texto: "Una antena de radio está sostenida por un cable que parte del tope de la antena hasta un punto del suelo. La antena mide <em>h</em> = <span class='math'>√<span style='text-decoration:overline'> 11 </span></span> m y el punto del suelo está a <em>a</em> = 5 m de la base. ¿Cuánto mide el cable <em>c</em>?",
+    figura: "",
+    opciones: [
+      { txt: "c = √36 = 6 m", correcta: true },
+      { txt: "c = √(11+25) = √36 = 6 m", correcta: false },
+      { txt: "c = √14 m", correcta: false },
+      { txt: "c = 5 + √11 m", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. El cable es la hipotenusa: c² = (√11)² + 5² = 11 + 25 = 36 → c = 6 m.",
+    feedback_err: "✘ Incorrecto. El cable, la antena y el suelo forman un triángulo rectángulo. c² = (√11)² + 5² = 11 + 25 = 36 → c = 6 m."
+  },
+  {
+    tipo: "Aplicación",
+    texto: "Dos postes verticales de alturas <em>h₁</em> = 3 m y <em>h₂</em> = <span class='math'>√<span style='text-decoration:overline'> 21 </span></span> m están separados horizontalmente 2 m entre sí. ¿Cuál es la distancia directa <em>d</em> entre sus extremos superiores?",
+    figura: "",
+    opciones: [
+      { txt: "d = √(9 + 21) = √30 m", correcta: false },
+      { txt: "d = √(4+12) = 4 m", correcta: false },
+      { txt: "d = √[(√21−3)² + 4] m", correcta: false },
+      { txt: "d = √[(√21−3)² + 4] ≠ entero; d = √(21+9−6√21+4) m", correcta: false },
+    ],
+    // Cálculo real: diferencia vertical = √21 − 3, horiz = 2
+    // d² = (√21 − 3)² + 2² = 21 − 6√21 + 9 + 4 = 34 − 6√21
+    // Cambiamos el enunciado a postes IGUALES con una cuerda diagonal para tener respuesta limpia
+    // MEJOR: reformular para terna limpia.
+    texto: "Una cuerda une el tope de un poste de <em>h</em> = <span class='math'>√<span style='text-decoration:overline'> 47 </span></span> m con un punto del suelo que está a <em>a</em> = 2 m de la base del poste. ¿Cuánto mide la cuerda <em>c</em>?",
+    opciones: [
+      { txt: "c = √51 m", correcta: true },
+      { txt: "c = 7 m", correcta: false },
+      { txt: "c = √(47·4) m", correcta: false },
+      { txt: "c = √49 = 7 m", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. c² = (√47)² + 2² = 47 + 4 = 51 → c = √51 m. Esta es la longitud exacta de la cuerda, expresada como raíz indicada.",
+    feedback_err: "✘ Incorrecto. Aplica Pitágoras: c² = (√47)² + 2² = 47 + 4 = 51 → c = √51 m."
+  },
+  {
+    tipo: "Aplicación",
+    texto: "En un parque, un camino recto va del punto A al punto B. Desde A se avanza 3/4 km hacia el este y luego se mide que la distancia directa AB = <em>c</em>. Si además la distancia norte-sur entre A y B es <em>b</em> = 1 km, ¿cuánto mide la distancia directa AB?",
+    figura: "",
+    opciones: [
+      { txt: "c = 5/4 km", correcta: true },
+      { txt: "c = 7/4 km", correcta: false },
+      { txt: "c = √(7/4) km", correcta: false },
+      { txt: "c = √(25/16) = 5/4 km", correcta: false },
+    ],
+    feedback_ok: "✔ Correcto. c² = (3/4)² + 1² = 9/16 + 16/16 = 25/16 → c = 5/4 km. (3/4, 1, 5/4) es la terna pitagórica (3,4,5) escalada por 1/4.",
+    feedback_err: "✘ Incorrecto. c² = (3/4)² + 1² = 9/16 + 16/16 = 25/16 → c = √(25/16) = 5/4 km. Es la terna (3,4,5) escalada por factor 1/4."
+  }
+];
+
+// ======================== SVG HELPERS ========================
+function svgTriangulo(w, h, labelA, labelB, labelC, basehyp) {
+  const px = 30, py = 20;
+  const W = w + 2*px, H = h + 2*py;
+  const x1=px, y1=h+py, x2=w+px, y2=h+py, x3=px, y3=py;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3}" fill="rgba(79,195,247,0.08)" stroke="#4fc3f7" stroke-width="2"/>
+    <rect x="${x1}" y="${y3}" width="14" height="14" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+    <text x="${(x1+x2)/2}" y="${y1+16}" fill="#e8a838" font-size="13" text-anchor="middle" font-family="Georgia,serif">${labelA}</text>
+    <text x="${x3-16}" y="${(y1+y3)/2}" fill="#e8a838" font-size="13" text-anchor="middle" font-family="Georgia,serif">${labelB}</text>
+    <text x="${(x2+x3)/2+14}" y="${(y1+y3)/2-10}" fill="#e8a838" font-size="13" text-anchor="middle" font-family="Georgia,serif">${labelC}</text>
+  </svg>`;
+}
+
+function svgEscalera() {
+  return `<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <line x1="20" y1="140" x2="140" y2="140" stroke="#4fc3f7" stroke-width="2"/>
+    <line x1="40" y1="140" x2="40" y2="20" stroke="#4fc3f7" stroke-width="2"/>
+    <rect x="40" y="125" width="12" height="15" fill="none" stroke="#4fc3f7" stroke-width="1.5"/>
+    <line x1="90" y1="140" x2="40" y2="20" stroke="#e8a838" stroke-width="2.5" stroke-dasharray="6,3"/>
+    <text x="62" y="155" fill="#8b9ab0" font-size="12" text-anchor="middle" font-family="Georgia">5 m</text>
+    <text x="25" y="82" fill="#8b9ab0" font-size="12" text-anchor="middle" font-family="Georgia">h</text>
+    <text x="75" y="80" fill="#e8a838" font-size="12" text-anchor="middle" font-family="Georgia">13 m</text>
+  </svg>`;
+}
+
+function svgRectangulo() {
+  return `<svg width="200" height="140" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="20" width="160" height="100" fill="rgba(79,195,247,0.05)" stroke="#4fc3f7" stroke-width="2"/>
+    <line x1="20" y1="120" x2="180" y2="20" stroke="#e8a838" stroke-width="2" stroke-dasharray="6,3"/>
+    <text x="100" y="135" fill="#8b9ab0" font-size="12" text-anchor="middle" font-family="Georgia">20 m</text>
+    <text x="5" y="72" fill="#8b9ab0" font-size="12" text-anchor="middle" font-family="Georgia">21 m</text>
+    <text x="108" y="82" fill="#e8a838" font-size="12" text-anchor="middle" font-family="Georgia">d = ?</text>
+  </svg>`;
+}
+
+// Fix de opciones duplicadas en pregunta 3
+preguntas[2].opciones = [
+  { txt: "c = 4", correcta: true },
+  { txt: "c = √10", correcta: false },
+  { txt: "c = 3 + √7", correcta: false },
+  { txt: "c = √(3·7) = √21", correcta: false },
+];
+
+// Fix opciones pregunta 5 (cateto de √53)
+preguntas[4].opciones = [
+  { txt: "b = √49 = 7", correcta: true },
+  { txt: "b = √57", correcta: false },
+  { txt: "b = √51", correcta: false },
+  { txt: "b = 3", correcta: false },
+];
+preguntas[4].feedback_ok = "✔ Correcto. b² = c² − a² = (√53)² − 2² = 53 − 4 = 49 → b = √49 = 7.";
+
+// ======================== ESTADO ========================
+let currentQ = 0;
+let respuestas = [];
+let timerInterval = null;
+let tiempoRestante = 120;
+let respondida = false;
+let estudiante = { nombre: "", grado: "" };
+const TOTAL_TIME = 120;
+const CIRCUMFERENCE = 2 * Math.PI * 30; // r=30
+
+function iniciarQuiz() {
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  const grado = document.getElementById('inp-grado').value;
+  if (!nombre) { alert("Por favor ingresa tu nombre completo."); return; }
+  if (!grado) { alert("Por favor selecciona tu grado."); return; }
+  estudiante = { nombre, grado };
+  document.getElementById('registro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  mostrarPregunta(0);
+}
+
+function mostrarPregunta(idx) {
+  currentQ = idx;
+  respondida = false;
+  clearInterval(timerInterval);
+  tiempoRestante = TOTAL_TIME;
+
+  const q = preguntas[idx];
+  document.getElementById('q-number').textContent = `Pregunta ${idx+1} de ${preguntas.length}`;
+  document.getElementById('q-category').textContent = q.tipo;
+  document.getElementById('q-text').innerHTML = q.texto;
+
+  const figEl = document.getElementById('q-figure');
+  figEl.innerHTML = q.figura || '';
+
+  // Opciones: mezclar aleatoriamente
+  const opciones = shuffle([...q.opciones]);
+  const letras = ['A', 'B', 'C', 'D'];
+  const optContainer = document.getElementById('q-options');
+  optContainer.innerHTML = '';
+  opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-letter">${letras[i]}</span> ${op.txt}`;
+    btn.onclick = () => responder(btn, op.correcta, idx, opciones);
+    optContainer.appendChild(btn);
+  });
+
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('feedback-box').className = 'feedback-box';
+  document.getElementById('btn-next').style.display = 'none';
+
+  // Progress
+  document.getElementById('progress-bar').style.width = ((idx / preguntas.length) * 100) + '%';
+
+  // Timer
+  actualizarTimer(TOTAL_TIME);
+  timerInterval = setInterval(() => {
+    tiempoRestante--;
+    actualizarTimer(tiempoRestante);
+    if (tiempoRestante <= 0) {
+      clearInterval(timerInterval);
+      if (!respondida) timeOut(idx, opciones);
+    }
+  }, 1000);
+}
+
+function actualizarTimer(t) {
+  const min = Math.floor(t / 60);
+  const sec = t % 60;
+  document.getElementById('timer-text').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+  const circle = document.getElementById('timer-circle');
+  const offset = CIRCUMFERENCE * (1 - t / TOTAL_TIME);
+  circle.style.strokeDashoffset = offset;
+  if (t <= 20) {
+    circle.style.stroke = '#e05c5c';
+    document.getElementById('timer-text').style.color = '#e05c5c';
+  } else {
+    circle.style.stroke = 'var(--accent)';
+    document.getElementById('timer-text').style.color = 'var(--accent)';
+  }
+}
+
+function responder(btn, correcta, idx, opciones) {
+  if (respondida) return;
+  respondida = true;
+  clearInterval(timerInterval);
+
+  const q = preguntas[idx];
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+  });
+
+  if (correcta) {
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    // Marcar la correcta
+    allBtns.forEach((b, i) => {
+      if (opciones[i] && opciones[i].correcta) b.classList.add('correct');
+    });
+  }
+
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  if (correcta) {
+    fb.className = 'feedback-box correct-fb';
+    fb.innerHTML = q.feedback_ok;
+  } else {
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = q.feedback_err;
+  }
+
+  respuestas[idx] = { correcta, tiempo: TOTAL_TIME - tiempoRestante };
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = idx < preguntas.length - 1 ? 'Siguiente pregunta →' : 'Ver resultados →';
+}
+
+function timeOut(idx, opciones) {
+  respondida = true;
+  const q = preguntas[idx];
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach((b, i) => {
+    b.disabled = true;
+    if (opciones[i] && opciones[i].correcta) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box wrong-fb';
+  fb.innerHTML = `⏱ Tiempo agotado. ${q.feedback_err}`;
+
+  respuestas[idx] = { correcta: false, tiempo: TOTAL_TIME };
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = idx < preguntas.length - 1 ? 'Siguiente pregunta →' : 'Ver resultados →';
+}
+
+function nextQuestion() {
+  if (currentQ < preguntas.length - 1) {
+    mostrarPregunta(currentQ + 1);
+  } else {
+    mostrarResultados();
+  }
+}
+
+function mostrarResultados() {
+  clearInterval(timerInterval);
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  const correctas = respuestas.filter(r => r && r.correcta).length;
+  const total = preguntas.length;
+  const nota = (correctas / total * 5).toFixed(1);
+
+  document.getElementById('res-name').textContent = `${estudiante.nombre} · ${estudiante.grado}`;
+  document.getElementById('res-nota').textContent = nota;
+  document.getElementById('res-correctas').textContent = correctas;
+
+  const notaEl = document.getElementById('res-nota');
+  if (parseFloat(nota) >= 3.0) notaEl.style.color = 'var(--success)';
+  else notaEl.style.color = 'var(--error)';
+
+  const container = document.getElementById('res-items');
+  container.innerHTML = '';
+  preguntas.forEach((q, i) => {
+    const ok = respuestas[i] && respuestas[i].correcta;
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <div class="ri-num ${ok ? 'ri-ok' : 'ri-no'}">${i+1}</div>
+      <div><strong style="color:${ok ? 'var(--success)' : 'var(--error)'}">${ok ? '✔ Correcta' : '✘ Incorrecta'}</strong> — ${q.tipo}</div>`;
+    container.appendChild(div);
+  });
+
+  // Nombre de archivo
+  const nombreSafe = estudiante.nombre.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').trim().replace(/\s+/g, '_');
+  const filename = `Pitagoras_${nombreSafe}_${estudiante.grado}.xlsx`;
+  document.getElementById('filename-preview').textContent = filename;
+  window._excelFilename = filename;
+}
+
+function descargarExcel() {
+  const correctas = respuestas.filter(r => r && r.correcta).length;
+  const total = preguntas.length;
+  const nota = parseFloat((correctas / total * 5).toFixed(1));
+  const aprobado = nota >= 3.0 ? 'APROBADO' : 'REPROBADO';
+  const fecha = new Date().toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' });
+  const hora = new Date().toLocaleTimeString('es-CO');
+
+  const wb = XLSX.utils.book_new();
+
+  // ── HOJA 1: REPORTE INDIVIDUAL ──
+  const wsData = [];
+
+  // Encabezado institución
+  wsData.push(['CUESTIONARIO — TEOREMA DE PITÁGORAS']);
+  wsData.push(['Docente: Luis Jorge Millán Bustamante   |   Trigonometría · Grado 10°']);
+  wsData.push([]);
+
+  // Datos del estudiante
+  wsData.push(['DATOS DEL ESTUDIANTE', '', '', '']);
+  wsData.push(['Nombre completo:', estudiante.nombre, '', '']);
+  wsData.push(['Grado:', estudiante.grado, '', '']);
+  wsData.push(['Fecha de presentación:', fecha, '', '']);
+  wsData.push(['Hora:', hora, '', '']);
+  wsData.push([]);
+
+  // Resultado
+  wsData.push(['RESULTADO FINAL', '', '', '']);
+  wsData.push(['Respuestas correctas:', correctas, 'de', total]);
+  wsData.push(['Porcentaje de acierto:', (correctas/total*100).toFixed(0) + '%', '', '']);
+  wsData.push(['NOTA (escala 0.0 – 5.0):', nota, '', '']);
+  wsData.push(['Estado:', aprobado, '', '']);
+  wsData.push([]);
+
+  // Detalle por pregunta
+  wsData.push(['DETALLE POR PREGUNTA', '', '', '']);
+  wsData.push(['N°', 'Tipo de pregunta', 'Resultado', 'Tiempo usado (seg)']);
+
+  preguntas.forEach((q, i) => {
+    const r = respuestas[i];
+    const ok = r && r.correcta ? 'CORRECTA' : 'INCORRECTA';
+    const tiempo = r ? r.tiempo : 120;
+    wsData.push([i+1, q.tipo, ok, tiempo]);
+  });
+
+  wsData.push([]);
+  wsData.push(['Resumen por categoría', '', '', '']);
+
+  const categorias = {};
+  preguntas.forEach((q, i) => {
+    if (!categorias[q.tipo]) categorias[q.tipo] = { ok: 0, total: 0 };
+    categorias[q.tipo].total++;
+    if (respuestas[i] && respuestas[i].correcta) categorias[q.tipo].ok++;
+  });
+  Object.entries(categorias).forEach(([cat, v]) => {
+    wsData.push([cat, `${v.ok} de ${v.total} correctas`, (v.ok/v.total*100).toFixed(0)+'%', '']);
+  });
+
+  wsData.push([]);
+  wsData.push(['Reporte generado automáticamente por el cuestionario web de Teorema de Pitágoras']);
+
+  const ws1 = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Anchos de columna
+  ws1['!cols'] = [{ wch: 30 }, { wch: 38 }, { wch: 20 }, { wch: 18 }];
+
+  // Estilos básicos (SheetJS community soporta limitado, pero aplicamos lo posible)
+  const boldCells = ['A1','A4','A10','A16','A17'];
+  // SheetJS free no aplica estilos de celda completos, pero sí merges y formatos
+  ws1['!merges'] = [
+    { s:{r:0,c:0}, e:{r:0,c:3} },  // Título
+    { s:{r:1,c:0}, e:{r:1,c:3} },  // Subtítulo
+    { s:{r:3,c:0}, e:{r:3,c:3} },  // DATOS ESTUDIANTE
+    { s:{r:9,c:0}, e:{r:9,c:3} },  // RESULTADO FINAL
+    { s:{r:15,c:0}, e:{r:15,c:3} }, // DETALLE
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Reporte Individual');
+
+  // ── HOJA 2: PARA EL DOCENTE (formato planilla) ──
+  const ws2Data = [
+    ['Nombre', 'Grado', 'Fecha', 'Hora',
+     'P1','P2','P3','P4','P5','P6','P7','P8','P9','P10',
+     'Correctas','Total','Nota','Estado'],
+    [
+      estudiante.nombre,
+      estudiante.grado,
+      fecha, hora,
+      ...respuestas.map(r => (r && r.correcta) ? 1 : 0),
+      correctas, total, nota, aprobado
+    ]
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(ws2Data);
+  ws2['!cols'] = [
+    {wch:28},{wch:8},{wch:18},{wch:10},
+    {wch:4},{wch:4},{wch:4},{wch:4},{wch:4},
+    {wch:4},{wch:4},{wch:4},{wch:4},{wch:4},
+    {wch:10},{wch:6},{wch:8},{wch:12}
+  ];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Datos para Docente');
+
+  // Descargar
+  XLSX.writeFile(wb, window._excelFilename || 'resultado_pitagoras.xlsx');
+
+  document.getElementById('download-success').style.display = 'block';
+  const btn = document.querySelector('.btn-download-xl');
+  btn.style.background = 'linear-gradient(135deg, #155a2c, #1a6e3a)';
+  btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ¡Descargado exitosamente!`;
+  btn.disabled = true;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
